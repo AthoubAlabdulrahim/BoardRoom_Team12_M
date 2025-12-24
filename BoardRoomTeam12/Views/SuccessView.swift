@@ -32,11 +32,11 @@ struct SuccessView: View {
 
             Text("Your booking for Ideation Room on Sunday, March 19, 2023 is confirmed.")
                 .font(.footnote.bold())
-                .foregroundColor(.black)
+                .foregroundColor(Color("blue2"))
                 .multilineTextAlignment(.center)
                 .frame(width: 358, height: 69)
                 .background(Color.white)
-                .cornerRadius(12)
+                .cornerRadius(10)
                 .shadow(color: .black.opacity(0.1), radius: 6)
                 .padding(.bottom, 40)
 
@@ -53,7 +53,7 @@ struct SuccessView: View {
                     .cornerRadius(12)
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .padding(.bottom, 60)
         }
         .ignoresSafeArea(edges: .top)
         .background(Color(red: 0.953, green: 0.953, blue: 0.953))
@@ -65,4 +65,3 @@ struct SuccessView: View {
 #Preview {
     SuccessView()
 }
-

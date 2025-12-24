@@ -29,7 +29,7 @@ struct LoginView: View {
             VStack(alignment: .leading, spacing: 5) {
                 
                 Spacer()
-                    .frame(height: 85)
+                    .frame(height: 150)
                 
                 Text("Welcome back! Glad to see you, Again!")
                     .font(.largeTitle.bold())
