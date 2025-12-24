@@ -106,7 +106,9 @@ struct LoginView: View {
                 Spacer()
             }
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(red: 0.953, green: 0.953, blue: 0.953))
+                .ignoresSafeArea()
+      //  .background(Color.white.ignoresSafeArea())
     }
 }
 

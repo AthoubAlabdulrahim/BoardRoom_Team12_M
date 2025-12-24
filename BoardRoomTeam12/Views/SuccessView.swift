@@ -12,7 +12,7 @@ struct SuccessView: View {
         VStack(spacing: 0) {
 
             ZStack {
-                Image("Background")
+                Image("backgroundLines")
                     .resizable()
                     .scaledToFill()
                     .frame(height: 400)
@@ -56,7 +56,9 @@ struct SuccessView: View {
             .padding(.bottom, 24)
         }
         .ignoresSafeArea(edges: .top)
-        .background(Color(.systemGroupedBackground))
+        .background(Color(red: 0.953, green: 0.953, blue: 0.953))
+                .ignoresSafeArea()
+      //  .background(Color(.systemGroupedBackground))
     }
 }
 
