@@ -8,87 +8,105 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
+    @State private var isPasswordVisible = false
+    
+    private let fieldWidth: CGFloat = 350
+    private let fieldHeight: CGFloat = 58
+    private let buttonHeight: CGFloat = 58
+    private let topImageHeight: CGFloat = 400
     
     var body: some View {
         ZStack(alignment: .top) {
-            // Background Image
-            Image("Background")
+            
+            Image("backgroundLines")
                 .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 300) // Adjust height as needed
+                .scaledToFill()
+                .frame(height: topImageHeight)
                 .frame(maxWidth: .infinity)
                 .clipped()
                 .ignoresSafeArea(edges: .top)
             
-            // Main content
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Spacer to push content below the image
-                    Color.clear
-                        .frame(height: 200) // Should be slightly less than image height
+            VStack(alignment: .leading, spacing: 20) {
+                
+                Spacer()
+                    .frame(height: 85)
+                
+                Text("Welcome back! Glad to see you, Again!")
+                    .font(.largeTitle.bold())
+                    .foregroundColor(Color(red: 191/255, green: 93/255, blue: 49/255))
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.85)     // Prevents overflow
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                
+                VStack(spacing: 20) {
                     
-                    // Login form
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("Welcome back! Glad to see you, Again!")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color(red: 191/255, green: 93/255, blue: 49/255))
-                            .padding(.top, 20)
-                        
-                        TextField("Enter your job number", text: $viewModel.jobNumber)
-                            .textFieldStyle(.roundedBorder)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                        
-                        SecureField("Enter your password", text: $viewModel.password)
-                            .textFieldStyle(.roundedBorder)
-                        
-                        if let error = viewModel.loginError {
-                            Text(error)
-                                .foregroundColor(.red)
-                                .font(.footnote)
+                    TextField("Enter your job number", text: $viewModel.jobNumber)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .frame(width: fieldWidth, height: fieldHeight)
+                        .padding(.horizontal, 16)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                        )
+                        .cornerRadius(12)
+                    
+                    ZStack(alignment: .trailing) {
+                        Group {
+                            if isPasswordVisible {
+                                TextField("Enter your password", text: $viewModel.password)
+                            } else {
+                                SecureField("Enter your password", text: $viewModel.password)
+                            }
                         }
+                        .autocapitalization(.none)
+                        .frame(width: fieldWidth, height: fieldHeight)
+                        .padding(.horizontal, 16)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                        )
+                        .cornerRadius(12)
                         
-                        Button(action: {
-                            viewModel.login()
-                        }) {
-                            Text(viewModel.isLoading ? "Logging in..." : "Login")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(viewModel.canLogin ? Color(red: 30/255, green: 30/255, blue: 67/255) : Color.gray)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
+                        Button {
+                            isPasswordVisible.toggle()
+                        } label: {
+                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 16)
                         }
-                        .disabled(!viewModel.canLogin || viewModel.isLoading)
-                        
-                        Spacer()
                     }
-                    .padding()
-                    .background(Color.white) // White background for the form
-                    .cornerRadius(20, corners: [.topLeft, .topRight])
-                    .shadow(radius: 5)
+                    
+                    if let error = viewModel.loginError {
+                        Text(error)
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .frame(width: fieldWidth, alignment: .leading)
+                    }
+                    
+                    Button {
+                        viewModel.login()
+                    } label: {
+                        Text(viewModel.isLoading ? "Logging in..." : "Login")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(width: fieldWidth, height: buttonHeight)
+                            .background(Color(red: 33/255, green: 38/255, blue: 82/255))
+                            .cornerRadius(12)
+                    }
+                    .disabled(!viewModel.canLogin || viewModel.isLoading)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 16)
+                
+                Spacer()
             }
-            .ignoresSafeArea()
         }
-        .background(Color.white.ignoresSafeArea()) // Ensure white background behind everything
-    }
-}
-
-// Extension for rounded corners on specific sides
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
+        .background(Color.white.ignoresSafeArea())
     }
 }
 
