@@ -10,20 +10,20 @@ final class CalendarStripViewModel: ObservableObject {
     init(
         calendar: Calendar = .current,
         initialSelected: Date = Date(),
-        daysBefore: Int = 14,
-        daysAfter: Int = 14
+        daysAfter: Int = 30
     ) {
         self.calendar = calendar
-        self.selectedDate = initialSelected
-        buildDays(around: initialSelected, daysBefore: daysBefore, daysAfter: daysAfter)
+        let today = calendar.startOfDay(for: initialSelected)
+        self.selectedDate = today
+        buildDays(startingAt: today, daysAfter: daysAfter)
     }
 
-    func buildDays(around center: Date, daysBefore: Int, daysAfter: Int) {
-        let start = calendar.date(byAdding: .day, value: -daysBefore, to: center) ?? center
-        let end = calendar.date(byAdding: .day, value: daysAfter, to: center) ?? center
+    private func buildDays(startingAt start: Date, daysAfter: Int) {
+        let startDay = calendar.startOfDay(for: start)
+        let end = calendar.date(byAdding: .day, value: daysAfter, to: startDay) ?? startDay
 
         var result: [Date] = []
-        var d = start
+        var d = startDay
         while d <= end {
             result.append(d)
             d = calendar.date(byAdding: .day, value: 1, to: d) ?? d
@@ -33,7 +33,11 @@ final class CalendarStripViewModel: ObservableObject {
     }
 
     func select(_ date: Date) {
-        selectedDate = date
+        let day = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: Date())
+        // Prevent selecting past dates
+        guard day >= today else { return }
+        selectedDate = day
     }
 
     func isSelected(_ date: Date) -> Bool {

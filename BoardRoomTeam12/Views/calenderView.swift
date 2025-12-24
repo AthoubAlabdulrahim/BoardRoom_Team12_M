@@ -3,7 +3,7 @@ import SwiftUI
 struct CalendarStripView: View {
     @ObservedObject var vm: CalendarStripViewModel
 
-    private let orange = Color(red: 0.78, green: 0.41, blue: 0.29) // close to your design
+    private let orange2 = Color("orange2")
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -20,10 +20,10 @@ struct CalendarStripView: View {
                             Text(vm.dayNumber(for: date))
                                 .font(.system(size: 16, weight: selected ? .bold : .semibold))
                                 .foregroundColor(selected ? .white : .primary)
-                                .frame(width: 44, height: 44)
+                                .frame(width: 34.95, height: 34.95)
                                 .background(
                                     Circle()
-                                        .fill(selected ? orange : Color.gray.opacity(0.15))
+                                        .fill(selected ? orange2 : Color.gray.opacity(0.15))
                                 )
                         }
                         .id(date)
@@ -40,11 +40,15 @@ struct CalendarStripView: View {
                 .padding(.vertical, 6)
             }
             .onAppear {
-                // Center the initial selected day
-                DispatchQueue.main.async {
-                    proxy.scrollTo(vm.selectedDate, anchor: .center)
-                }
+                // No centering; today is the first item and should be at the far left by default.
+                // If you still want to ensure it's visible after layout, you can scroll to it with a leading anchor:
+                // DispatchQueue.main.async { proxy.scrollTo(vm.selectedDate, anchor: .leading) }
             }
         }
     }
+}
+
+#Preview {
+    CalendarStripView(vm: CalendarStripViewModel())
+        .padding()
 }
