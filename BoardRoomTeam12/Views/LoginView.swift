@@ -10,7 +10,7 @@ struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     @State private var isPasswordVisible = false
     
-    private let fieldWidth: CGFloat = 350
+    private let fieldWidth: CGFloat = 340
     private let fieldHeight: CGFloat = 58
     private let buttonHeight: CGFloat = 58
     private let topImageHeight: CGFloat = 400
@@ -26,7 +26,7 @@ struct LoginView: View {
                 .clipped()
                 .ignoresSafeArea(edges: .top)
             
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 5) {
                 
                 Spacer()
                     .frame(height: 85)
@@ -94,7 +94,7 @@ struct LoginView: View {
                         Text(viewModel.isLoading ? "Logging in..." : "Login")
                             .font(.headline)
                             .foregroundColor(.white)
-                            .frame(width: fieldWidth, height: buttonHeight)
+                            .frame(width: 370, height: buttonHeight)
                             .background(Color(red: 33/255, green: 38/255, blue: 82/255))
                             .cornerRadius(12)
                     }
