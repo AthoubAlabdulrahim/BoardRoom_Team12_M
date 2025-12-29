@@ -107,7 +107,12 @@ struct LoginView: View {
             }
         }
         .background(Color(red: 0.953, green: 0.953, blue: 0.953))
-                .ignoresSafeArea()
+        .ignoresSafeArea()
+        // Present HomeView when login succeeds
+        .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+            HomeView()
+                .interactiveDismissDisabled(true)
+        }
       //  .background(Color.white.ignoresSafeArea())
     }
 }

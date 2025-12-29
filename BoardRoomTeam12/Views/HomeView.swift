@@ -53,15 +53,21 @@ struct HomeView: View {
                                     .foregroundColor(Color("orange2"))
                             }
 
-                            bookingCard(
-                                imageName: "room1",
-                                name: "Creative Space",
-                                floor: "Floor 5",
-                                capacity: "1",
-                                statusText: "28 March",
-                                statusColor: Color("blue2"),
-                                statusTextColor: .white
-                            )
+                            NavigationLink {
+                                // Navigate in existing-booking mode
+                                RoomDetailView(roomId: "Creative Space", isExistingBooking: true)
+                            } label: {
+                                bookingCard(
+                                    imageName: "room1",
+                                    name: "Creative Space",
+                                    floor: "Floor 5",
+                                    capacity: "1",
+                                    statusText: "28 March",
+                                    statusColor: Color("blue2"),
+                                    statusTextColor: .white
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
 
                         // 📌 All bookings
@@ -75,22 +81,27 @@ struct HomeView: View {
                             // 📅 Days
                             CalendarStripView(vm: calendarVM)
 
-
                             // 🪑 Rooms
                             ForEach(viewModel.rooms) { room in
-                                bookingCard(
-                                    imageName: room.imageName,
-                                    name: room.name,
-                                    floor: room.floor,
-                                    capacity: "\(room.capacity)",
-                                    statusText: room.isAvailable ? "Available" : "Unavailable",
-                                    statusColor: room.isAvailable
-                                        ? Color("AvailableColor")
-                                        : Color("UnavailableColor"),
-                                    statusTextColor: room.isAvailable
-                                        ? Color("light_green")
-                                        : Color("light_pink")
-                                )
+                                NavigationLink {
+                                    // Navigate in browse mode (new booking)
+                                    RoomDetailView(roomId: room.name, isExistingBooking: false)
+                                } label: {
+                                    bookingCard(
+                                        imageName: room.imageName,
+                                        name: room.name,
+                                        floor: room.floor,
+                                        capacity: "\(room.capacity)",
+                                        statusText: room.isAvailable ? "Available" : "Unavailable",
+                                        statusColor: room.isAvailable
+                                            ? Color("AvailableColor")
+                                            : Color("UnavailableColor"),
+                                        statusTextColor: room.isAvailable
+                                            ? Color("light_green")
+                                            : Color("light_pink")
+                                    )
+                                }
+                                .buttonStyle(.plain) // keep the card styling unchanged
                             }
                         }
                     }

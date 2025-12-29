@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct SuccessView: View {
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +44,12 @@ struct SuccessView: View {
             Spacer()
 
             Button(action: {
+                // Pop SuccessView
+                dismiss()
+                // Then pop RoomDetailView back to HomeView
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    dismiss()
+                }
             }) {
                 Text("Done")
                     .fontWeight(.semibold)
@@ -55,9 +62,10 @@ struct SuccessView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 60)
         }
+        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .background(Color(red: 0.953, green: 0.953, blue: 0.953))
-                .ignoresSafeArea()
+        .ignoresSafeArea()
       //  .background(Color(.systemGroupedBackground))
     }
 }
