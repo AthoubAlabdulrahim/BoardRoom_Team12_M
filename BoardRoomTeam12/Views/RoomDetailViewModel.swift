@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 @MainActor
 class RoomDetailViewModel: ObservableObject {
@@ -39,4 +40,8 @@ class RoomDetailViewModel: ObservableObject {
             self.isLoading = false
         }
     }
+}
+
+#Preview {
+    RoomDetailView()
 }
