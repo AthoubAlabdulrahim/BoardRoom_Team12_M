@@ -183,6 +183,7 @@ struct RoomDetailView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
+        .navigationBarBackButtonHidden(true) // Hide the default back button
         .onAppear {
             viewModel.fetchRoomDetail(roomId: roomId)
         }

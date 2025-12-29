@@ -11,7 +11,10 @@ import SwiftUI
 struct BoardRoomTeam12App: App {
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            NavigationStack {
+                LoginView()
+            }
+            .navigationBarBackButtonHidden(true) // Hide the default back button for all pushed views
         }
     }
 }

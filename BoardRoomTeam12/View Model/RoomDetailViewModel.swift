@@ -43,5 +43,5 @@ class RoomDetailViewModel: ObservableObject {
 }
 
 #Preview {
-    RoomDetailView()
+    RoomDetailView(roomId: "room-1", isExistingBooking: false)
 }

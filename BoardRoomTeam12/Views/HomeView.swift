@@ -109,6 +109,7 @@ struct HomeView: View {
                 }
                 .background(Color(.systemGroupedBackground))
             }
+            .navigationBarBackButtonHidden(true) // Hide the default back button for all views in this stack
         }
     }
 
