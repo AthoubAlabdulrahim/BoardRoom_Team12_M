@@ -8,12 +8,11 @@ class RoomDetailViewModel: ObservableObject {
     @Published var room: RoomDetail?
     @Published var selectedDateID: String?
     @Published var isLoading = false
-    
+    @Published var calendarVM = CalendarStripViewModel()
 
     func fetchRoomDetail(roomId: String) {
         isLoading = true
 
-       
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.room = RoomDetail(
                 id: roomId,
@@ -26,17 +25,22 @@ class RoomDetailViewModel: ObservableObject {
                     Facility(id: "1", title: "Wi-Fi", icon: "wifi"),
                     Facility(id: "2", title: "Screen", icon: "screen")
                 ],
-                availableDates: [
-                    BookingDate(id: "1", day: "Thu", date: "16", isAvailable: false),
-                    BookingDate(id: "2", day: "Sun", date: "19", isAvailable: true),
-                    BookingDate(id: "3", day: "Mon", date: "20", isAvailable: true),
-                    BookingDate(id: "4", day: "Wed", date: "22", isAvailable: false),
-                    BookingDate(id: "5", day: "Wed", date: "22", isAvailable: false),
-                    BookingDate(id: "6", day: "Thru", date: "22", isAvailable: false),
-                    BookingDate(id: "7", day: "Wed", date: "22", isAvailable: true),
-                    BookingDate(id: "8", day: "Friday", date: "22", isAvailable: true)
-                ]
+                // Keeping this to match your model, but UI now uses CalendarStripView
+                availableDates: []
             )
+
+            // Example availability rule:
+            // - Weekends are unavailable
+            // - Additionally, make the 3rd and 7th day from today unavailable (demo)
+            self.calendarVM.setAvailability(using: { date in
+                let cal = Calendar.current
+                let weekday = cal.component(.weekday, from: date) // 1: Sunday ... 7: Saturday
+                let isWeekend = (weekday == 1 || weekday == 7)
+                let daysFromToday = cal.dateComponents([.day], from: cal.startOfDay(for: Date()), to: cal.startOfDay(for: date)).day ?? 0
+                let extraBlocked = (daysFromToday == 3 || daysFromToday == 7)
+                return !(isWeekend || extraBlocked)
+            })
+
             self.isLoading = false
         }
     }
@@ -45,3 +49,4 @@ class RoomDetailViewModel: ObservableObject {
 #Preview {
     RoomDetailView(roomId: "room-1", isExistingBooking: false)
 }
+

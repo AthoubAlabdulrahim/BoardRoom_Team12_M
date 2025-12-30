@@ -11,6 +11,7 @@ struct CalendarStripView: View {
                 LazyHStack(spacing: 14) {
                     ForEach(vm.days, id: \.self) { date in
                         let selected = vm.isSelected(date)
+                        let available = vm.isAvailable(date)
 
                         VStack(spacing: 8) {
                             Text(vm.weekdayText(for: date))
@@ -19,16 +20,21 @@ struct CalendarStripView: View {
 
                             Text(vm.dayNumber(for: date))
                                 .font(.system(size: 16, weight: selected ? .bold : .semibold))
-                                .foregroundColor(selected ? .white : .primary)
+                                .foregroundColor(available ? (selected ? .white : .primary) : .white)
                                 .frame(width: 34.95, height: 34.95)
                                 .background(
                                     Circle()
-                                        .fill(selected ? orange2 : Color.gray.opacity(0.15))
+                                        .fill(
+                                            available
+                                            ? (selected ? orange2 : Color.gray.opacity(0.15))
+                                            : Color.gray.opacity(0.6)
+                                        )
                                 )
                         }
                         .id(date)
                         .contentShape(Rectangle())
                         .onTapGesture {
+                            guard available else { return }
                             withAnimation(.easeInOut) {
                                 vm.select(date)
                                 proxy.scrollTo(date, anchor: .center)
@@ -40,9 +46,8 @@ struct CalendarStripView: View {
                 .padding(.vertical, 6)
             }
             .onAppear {
-                // No centering; today is the first item and should be at the far left by default.
-                // If you still want to ensure it's visible after layout, you can scroll to it with a leading anchor:
-                // DispatchQueue.main.async { proxy.scrollTo(vm.selectedDate, anchor: .leading) }
+                // If needed, you can ensure current selection is visible:
+                // DispatchQueue.main.async { proxy.scrollTo(vm.selectedDate, anchor: .center) }
             }
         }
     }

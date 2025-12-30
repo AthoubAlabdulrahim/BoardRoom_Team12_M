@@ -11,6 +11,9 @@ struct RoomDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showUpdateConfirm = false
 
+    // Track whether the user explicitly picked a date (to mimic previous enabling behavior)
+    @State private var userSelectedDate = false
+
     var body: some View {
         VStack(spacing: 0) {
 
@@ -63,7 +66,6 @@ struct RoomDetailView: View {
                             .padding()
                         }
 
-                        
                         Text("Description")
                             .font(AppFont.sectionTitle)
                             .padding(.horizontal)
@@ -75,45 +77,13 @@ struct RoomDetailView: View {
                             .cornerRadius(6)
                             .padding(.horizontal)
 
-                        
-                        Text("Facilities")
+                        Text("Select a date")
                             .font(AppFont.sectionTitle)
                             .padding(.horizontal)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(room.facilities) { facility in
-                                    FacilityChip(
-                                        customIconName: facility.icon,
-                                        title: facility.title
-                                    )
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-
-                        Text("All bookings for March")
-                            .font(AppFont.sectionTitle)
-                            .padding(.horizontal)
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 18) {
-                                ForEach(room.availableDates) { date in
-                                    CalendarCircleView(
-                                        model: date,
-                                        isSelected: viewModel.selectedDateID == date.id
-                                    )
-                                    .onTapGesture {
-                                        if date.isAvailable {
-                                            withAnimation(.easeInOut) {
-                                                viewModel.selectedDateID = date.id
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
+                        // Reusable calendar strip
+                        CalendarStripView(vm: viewModel.calendarVM)
+                            .padding(.horizontal, 0)
 
                         // Hidden NavigationLink for booking flow (browse mode)
                         if !isExistingBooking {
@@ -140,8 +110,8 @@ struct RoomDetailView: View {
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
                                 }
-                                .disabled(viewModel.selectedDateID == nil) // require a selected date
-                                .opacity(viewModel.selectedDateID == nil ? 0.6 : 1.0)
+                                .disabled(!userSelectedDate)
+                                .opacity(!userSelectedDate ? 0.6 : 1.0)
 
                                 Button {
                                     showDeleteConfirm = true
@@ -159,8 +129,8 @@ struct RoomDetailView: View {
                             .padding(.bottom, 20)
                             .transition(.opacity.combined(with: .move(edge: .bottom)))
                         } else {
-                            // Browse mode: Booking button (only after date selection)
-                            if viewModel.selectedDateID != nil {
+                            // Browse mode: Booking button (enabled after user picked a date)
+                            if userSelectedDate {
                                 Button(action: {
                                     // Perform booking, then show success
                                     navigateToSuccess = true
@@ -186,6 +156,10 @@ struct RoomDetailView: View {
         .navigationBarBackButtonHidden(true) // Hide the default back button
         .onAppear {
             viewModel.fetchRoomDetail(roomId: roomId)
+        }
+        // Flip the flag when the user changes the selection in the calendar strip
+        .onChange(of: viewModel.calendarVM.selectedDate) { _ in
+            userSelectedDate = true
         }
         .alert("Update booking?", isPresented: $showUpdateConfirm) {
             Button("Cancel", role: .cancel) {}

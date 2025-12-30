@@ -4,6 +4,8 @@ import Combine
 final class CalendarStripViewModel: ObservableObject {
     @Published var selectedDate: Date
     @Published private(set) var days: [Date] = []
+    // Availability per day (true = available, false = unavailable)
+    @Published private(set) var availability: [Date: Bool] = [:]
 
     private let calendar: Calendar
 
@@ -16,6 +18,8 @@ final class CalendarStripViewModel: ObservableObject {
         let today = calendar.startOfDay(for: initialSelected)
         self.selectedDate = today
         buildDays(startingAt: today, daysAfter: daysAfter)
+        // By default, mark all generated days available
+        setAvailability { _ in true }
     }
 
     private func buildDays(startingAt start: Date, daysAfter: Int) {
@@ -32,11 +36,31 @@ final class CalendarStripViewModel: ObservableObject {
         days = result
     }
 
+    // Provide availability via a rule closure
+    func setAvailability(using rule: (Date) -> Bool) {
+        var map: [Date: Bool] = [:]
+        for day in days {
+            map[calendar.startOfDay(for: day)] = rule(day)
+        }
+        availability = map
+
+        // If currently selected day becomes unavailable, move selection to the next available day
+        if !(availability[calendar.startOfDay(for: selectedDate)] ?? true) {
+            if let next = days.first(where: { availability[calendar.startOfDay(for: $0)] ?? true }) {
+                selectedDate = next
+            }
+        }
+    }
+
+    func isAvailable(_ date: Date) -> Bool {
+        availability[calendar.startOfDay(for: date)] ?? true
+    }
+
     func select(_ date: Date) {
         let day = calendar.startOfDay(for: date)
         let today = calendar.startOfDay(for: Date())
-        // Prevent selecting past dates
-        guard day >= today else { return }
+        // Prevent selecting past dates and unavailable dates
+        guard day >= today, isAvailable(day) else { return }
         selectedDate = day
     }
 
