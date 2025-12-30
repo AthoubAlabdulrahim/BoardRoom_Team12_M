@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C61CFE002F03C025000895F8 /* EmployeesModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		67F1BEBB2EFA82B2003753EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		67F1BEAD2EFA82B1003753EE /* BoardRoomTeam12.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoardRoomTeam12.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		67F1BEBA2EFA82B2003753EE /* BoardRoomTeam12Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		67F1BEC42EFA82B2003753EE /* BoardRoomTeam12UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeesModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +84,7 @@
 				67F1BEBD2EFA82B2003753EE /* BoardRoomTeam12Tests */,
 				67F1BEC72EFA82B2003753EE /* BoardRoomTeam12UITests */,
 				67F1BEAE2EFA82B1003753EE /* Products */,
+				C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -236,6 +242,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C61CFE002F03C025000895F8 /* EmployeesModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
