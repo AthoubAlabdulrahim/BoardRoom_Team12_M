@@ -1,5 +1,5 @@
 //
-//  APIConstants.swift
+//  EmployeeAPI.swift
 //  BoardRoomTeam12
 //
 //  Created by Athoub Alabdulrahim on 03/07/1447 AH.
@@ -7,7 +7,8 @@
 
 import Foundation
 
-enum APIConstants {
+enum EmployeeAPI {
+    // Build authorized GET request
     static func authorizedRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -17,6 +18,7 @@ enum APIConstants {
     }
 
     // Build a URL that filters by EmployeeNumber, returning at most 1 record
+    // Airtable filter formula for numeric field: ({EmployeeNumber}=112233)
     static func employeesURL(jobNumber: Int) throws -> URL {
         guard var components = URLComponents(string: Secrets.airtableBaseURLString) else {
             throw APIError.invalidURL

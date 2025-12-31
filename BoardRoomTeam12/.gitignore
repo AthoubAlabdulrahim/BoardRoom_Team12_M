@@ -1,0 +1,35 @@
+# Xcode and build artifacts
+DerivedData/
+build/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# User-specific
+*.perspectivev3
+*.mode1v3
+*.pbxuser
+
+# macOS
+.DS_Store
+
+# Secrets (do not commit)
+Secrets.swift
