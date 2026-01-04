@@ -4,30 +4,43 @@
 //
 //  Created by Jamilah Jaber Hazazi on 03/07/1447 AH.
 //
-
 import Foundation
 import Combine
 
-final class BookingViewModel: ObservableObject {
+@MainActor
+class BookingViewModel: ObservableObject {
+    @Published var rooms: [RoomRecord] = []
+    @Published var myBookings: [BookingRecord] = []
+    @Published var isLoading = false
     
-    @Published var rooms: [Room] = [
-        Room(name: "Creative Space",
-             floor: "Floor 5",
-             capacity: 1,
-             imageName: "room1",
-             isAvailable: true),
-        
-        Room(name: "Ideation Room",
-             floor: "Floor 3",
-             capacity: 16,
-             imageName: "room2",
-             isAvailable: false),
-        
-        Room(name: "Inspiration Room",
-             floor: "Floor 1",
-             capacity: 18,
-             imageName: "room3",
-             isAvailable: false)
-    ]
+    private let roomService = DefaultRoomService()
+    private let bookingService = DefaultBookingService()
     
+    init() {
+        Task { await loadData() }
+    }
+    
+    func loadData() async {
+        isLoading = true
+        // جلب معرف الموظف الذي سجل دخوله من UserDefaults
+        let currentEmployeeID = UserDefaults.standard.string(forKey: "current_employee_id") ?? ""
+        
+        do {
+            // جلب البيانات من الـ API بشكل متوازي
+            async let fetchedRooms = roomService.fetchRooms()
+            async let fetchedAllBookings = bookingService.fetchAllBookings()
+            
+            let allRooms = try await fetchedRooms
+            let allBookings = try await fetchedAllBookings
+            
+            self.rooms = allRooms
+            
+            // 🔥 الفلترة: نأخذ فقط الحجوزات التي تخص الموظف الحالي
+            self.myBookings = allBookings.filter { $0.fields.employeeID == currentEmployeeID }
+            
+        } catch {
+            print("❌ Error loading data: \(error)")
+        }
+        isLoading = false
+    }
 }

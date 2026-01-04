@@ -1,3 +1,6 @@
+//
+// Models/RoomDetail
+
 import Foundation
 
 struct RoomDetail: Identifiable, Decodable {

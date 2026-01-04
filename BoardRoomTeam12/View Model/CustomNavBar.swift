@@ -1,32 +1,47 @@
+//View Model/CustomNavBar
+
 import SwiftUI
 
 struct CustomNavBar: View {
     let title: String
+    var onBack: (() -> Void)? = nil
+
     var body: some View {
-        ZStack {
-            Color(red: 35/255, green: 36/255, blue: 85/255)
-                .ignoresSafeArea(edges: .top)
+        GeometryReader { geo in
+            let width = min(geo.size.width, 430)
+            let barHeight: CGFloat = 52
 
-            HStack {
-                Image("Icon")
-                    .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 28)
+            ZStack {
+                Color(red: 35/255, green: 36/255, blue: 85/255)
+                    .ignoresSafeArea(edges: .top)
+
+                HStack(spacing: 12) {
+                    if let onBack {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 28, height: 28)
+                                .contentShape(Rectangle())
+                        }
+                    } else {
+                        // Keep space so title remains centered if no back button
+                        Color.clear.frame(width: 28, height: 28)
+                    }
+
+                    Text(title)
                         .foregroundColor(.white)
+                        .font(.system(size: 17, weight: .semibold))
+
                     Spacer()
-                    .frame(width: 116)
-                Text(title)
-                    .foregroundColor(.white)
-                    .font(.system(size: 16, weight: .semibold))
 
-                Spacer()
-
-                            }
-            .padding(.horizontal)
-            .padding(.top, 11)
-            .padding(.bottom, 11)
+                    // Right side placeholder for symmetry if needed
+                    Color.clear.frame(width: 28, height: 28)
+                }
+                .padding(.horizontal)
+            }
+            .frame(height: barHeight)
         }
-        .frame(height: 44)
+        .frame(height: 52)
     }
 }
-

@@ -1,3 +1,5 @@
+// Models/BookingDate
+
 import Foundation
 
 struct BookingDate: Identifiable, Decodable {
@@ -6,3 +8,5 @@ struct BookingDate: Identifiable, Decodable {
     let date: String
     let isAvailable: Bool
 }
+
+

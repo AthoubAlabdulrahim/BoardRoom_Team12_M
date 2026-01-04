@@ -1,3 +1,5 @@
+//View Model/calenderStrip
+
 import Foundation
 import Combine
 
@@ -80,3 +82,4 @@ final class CalendarStripViewModel: ObservableObject {
         return String(day)
     }
 }
+

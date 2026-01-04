@@ -1,187 +1,176 @@
 import SwiftUI
 
 struct RoomDetailView: View {
-
-    let roomId: String
+    // 1. الخصائص التي نحتاجها من الخارج
+    let roomRecord: RoomRecord
     let isExistingBooking: Bool
-
+    
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = RoomDetailViewModel()
     @State private var navigateToSuccess = false
     @State private var showDeleteConfirm = false
     @State private var showUpdateConfirm = false
-
-    // Track whether the user explicitly picked a date (to mimic previous enabling behavior)
     @State private var userSelectedDate = false
 
     var body: some View {
+        let deviceWidth = min(UIScreen.main.bounds.width, 430)
+        let horizontalPadding: CGFloat = 12 // shift content slightly left by using smaller padding
+        let bannerHeight = deviceWidth * 0.72
+        let gradientHeight: CGFloat = 84
+
         VStack(spacing: 0) {
+            CustomNavBar(title: roomRecord.fields.name)
+            
+            GeometryReader { geo in
+                let bottomInset = geo.safeAreaInsets.bottom
 
-            CustomNavBar(title: viewModel.room?.name ?? "Room")
-
-            if viewModel.isLoading {
-                ProgressView()
-                    .padding()
-            }
-
-            ScrollView {
-                if let room = viewModel.room {
-
-                    VStack(alignment: .leading, spacing: 16) {
-                        
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        // 🖼 صورة الغرفة
                         ZStack(alignment: .bottom) {
-                            Image(room.imageUrl)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(height: 323)
-                                .clipped()
-
+                            AsyncImage(url: URL(string: roomRecord.fields.imageURL)) { image in
+                                image.resizable().scaledToFill()
+                            } placeholder: {
+                                Color.gray.opacity(0.1)
+                            }
+                            .frame(height: bannerHeight)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .clipped()
+                            
                             LinearGradient(
                                 colors: [.clear, .white],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
-                            .frame(height: 80)
-
+                            .frame(height: gradientHeight)
+                            
                             HStack {
-                                Label("Floor \(room.floor)", systemImage: "paperplane")
+                                Label("Floor \(roomRecord.fields.floorNo)", systemImage: "paperplane")
                                     .font(AppFont.caption)
                                     .foregroundColor(Color(red: 35/255, green: 36/255, blue: 85/255))
-
                                 Spacer()
-
-                                Label {
-                                    Text("\(room.capacity)")
-                                        .font(AppFont.caption)
-                                } icon: {
-                                    Image("person")
-                                        .resizable()
-                                        .frame(width: 16, height: 16)
-                                }
-                                .foregroundColor(.orange)
-                                .padding(6)
-                                .background(Color.white)
-                                .cornerRadius(8)
+                                Label("\(roomRecord.fields.seatNo)", systemImage: "person.2")
+                                    .font(AppFont.caption)
+                                    .foregroundColor(.orange)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 8)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
                             }
-                            .padding()
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.bottom, 8)
                         }
 
                         Text("Description")
                             .font(AppFont.sectionTitle)
-                            .padding(.horizontal)
+                            .padding(.horizontal, horizontalPadding)
 
-                        Text(room.description)
+                        Text(roomRecord.fields.description)
                             .font(AppFont.body)
-                            .padding()
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.white)
-                            .cornerRadius(6)
-                            .padding(.horizontal)
+                            .cornerRadius(10)
+                            .padding(.horizontal, horizontalPadding)
+                        
+                        // المرافق
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Facilities")
+                                .font(AppFont.sectionTitle)
+                                .padding(.horizontal, horizontalPadding)
 
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(roomRecord.fields.facilities, id: \.self) { facility in
+                                        FacilityChip(customIconName: getIconName(for: facility), title: facility)
+                                    }
+                                }
+                                .padding(.horizontal, horizontalPadding)
+                            }
+                        }
+
+                        // التاريخ
                         Text("Select a date")
                             .font(AppFont.sectionTitle)
-                            .padding(.horizontal)
+                            .padding(.horizontal, horizontalPadding)
 
-                        // Reusable calendar strip
                         CalendarStripView(vm: viewModel.calendarVM)
-                            .padding(.horizontal, 0)
+                            .padding(.bottom, 4)
 
-                        // Hidden NavigationLink for booking flow (browse mode)
-                        if !isExistingBooking {
-                            NavigationLink(
-                                destination: SuccessView(),
-                                isActive: $navigateToSuccess
-                            ) { EmptyView() }
-                            .hidden()
-                        }
-
-                        // Action buttons
+                        // الأزرار أقرب للمحتوى
                         if isExistingBooking {
-                            // Existing booking mode: Update + Delete
-                            VStack(spacing: 12) {
-                                Button {
-                                    // Confirm update, then go back to HomeView
-                                    showUpdateConfirm = true
-                                } label: {
-                                    Text("Update")
-                                        .font(AppFont.button)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color(red: 212/255, green: 94/255, blue: 57/255))
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                }
-                                .disabled(!userSelectedDate)
-                                .opacity(!userSelectedDate ? 0.6 : 1.0)
-
-                                Button {
-                                    showDeleteConfirm = true
-                                } label: {
-                                    Text("Delete booking")
-                                        .font(AppFont.button)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.gray.opacity(0.15))
-                                        .foregroundColor(Color("blue2"))
-                                        .cornerRadius(10)
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.bottom, 20)
-                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            existingBookingButtons
                         } else {
-                            // Browse mode: Booking button (enabled after user picked a date)
-                            if userSelectedDate {
-                                Button(action: {
-                                    // Perform booking, then show success
-                                    navigateToSuccess = true
-                                }) {
-                                    Text("Booking")
-                                        .font(AppFont.button)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color(red: 212/255, green: 94/255, blue: 57/255))
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                }
-                                .padding(.horizontal)
-                                .padding(.bottom, 20)
-                                .transition(.opacity.combined(with: .move(edge: .bottom)))
-                            }
+                            newBookingButton
                         }
                     }
+                    .padding(.top, 8)
+                    .padding(.bottom, max(8, bottomInset)) // safe-area aware, but minimal
+                    .frame(maxWidth: .infinity, alignment: .leading) // align left
                 }
             }
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarBackButtonHidden(true) // Hide the default back button
+        .navigationBarBackButtonHidden(true)
         .onAppear {
-            viewModel.fetchRoomDetail(roomId: roomId)
+            viewModel.setup(with: roomRecord)
         }
-        // Flip the flag when the user changes the selection in the calendar strip
-        .onChange(of: viewModel.calendarVM.selectedDate) { _ in
+        .onChange(of: viewModel.calendarVM.selectedDate) { _, _ in
             userSelectedDate = true
         }
-        .alert("Update booking?", isPresented: $showUpdateConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Update", role: .none) {
-                // Simulate saving update, then go back to Home
-                dismiss()
-            }
-        } message: {
-            Text("Change the booking to the selected date?")
+    }
+    
+    // دالة مساعدة لاختيار الأيقونة
+    func getIconName(for facility: String) -> String {
+        switch facility {
+        case "Wi-Fi": return "wifi"
+        case "Screen": return "tv"
+        case "Microphone": return "mic"
+        case "Projector": return "videoprojector"
+        default: return "star"
         }
-        .alert("Delete this booking?", isPresented: $showDeleteConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
-                // Simulate deletion, then go back to Home
-                dismiss()
-            }
-        } message: {
-            Text("This action cannot be undone.")
+    }
+
+    // الأزرار كـ Views منفصلة لترتيب الكود
+    var existingBookingButtons: some View {
+        VStack(spacing: 10) {
+            Button("Update") { showUpdateConfirm = true }
+                .buttonStyle(PrimaryButtonStyle(isEnabled: userSelectedDate))
+            
+            Button("Delete booking") { showDeleteConfirm = true }
+                .foregroundColor(Color("blue2"))
+                .padding(12)
+                .frame(maxWidth: .infinity)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
         }
+        .padding(.horizontal, 12)
+        .padding(.top, 2)
+        .padding(.bottom, 4)
+    }
+
+    var newBookingButton: some View {
+        Button("Booking") { navigateToSuccess = true }
+            .buttonStyle(PrimaryButtonStyle(isEnabled: userSelectedDate))
+            .padding(.horizontal, 12)
+            .padding(.top, 2)
+            .padding(.bottom, 4)
+            .opacity(userSelectedDate ? 1 : 0)
     }
 }
 
-#Preview {
-    RoomDetailView(roomId: "Ideation Room", isExistingBooking: true)
+// Helper لستايل الأزرار
+struct PrimaryButtonStyle: ButtonStyle {
+    let isEnabled: Bool
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(AppFont.button)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13) // slightly tighter to keep button nearer
+            .background(Color(red: 212/255, green: 94/255, blue: 57/255))
+            .foregroundColor(.white)
+            .cornerRadius(12)
+            .opacity(isEnabled ? 1 : 0.6)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+    }
 }
