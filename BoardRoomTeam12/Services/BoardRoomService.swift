@@ -6,7 +6,6 @@ final class BoardRoomService {
         let response: BoardRoomsResponse =
             try await APIClient.shared.get(Endpoints.rooms)
         let a = response.records
-        print(a)
         return a
     }
 }

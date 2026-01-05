@@ -12,7 +12,7 @@ struct Booking: Identifiable, Decodable {
 struct BookingFields: Codable {
     let employeeID: String?
     let boardroomID: String
-    let date: Int        // ✅ FIX
+    let date: Int        
     let status: String?
 
     enum CodingKeys: String, CodingKey {

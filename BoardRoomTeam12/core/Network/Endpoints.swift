@@ -1,5 +1,6 @@
 import Foundation
 
+// all end points so that we not have to add the end point in every file
 enum Endpoints {
 
     static var employees: URL {

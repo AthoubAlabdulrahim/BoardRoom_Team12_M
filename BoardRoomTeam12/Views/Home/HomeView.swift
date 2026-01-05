@@ -3,28 +3,29 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = BookingViewModel()
     @StateObject private var calendarVM = CalendarStripViewModel()
+
     @State private var refreshToken = UUID()
     @State private var selectedRoomID: String? = nil
+
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
+                let layout = Layout(width: geo.size.width)
 
-                let width = max(min(geo.size.width, 430), 1)
-                let topBarHeight: CGFloat = 52
-                let bannerWidth = max(width - 32, 1)
-                let bannerHeight = bannerWidth * 0.385
-                let cardImageSize: CGFloat = 80
+                VStack(spacing: 0) {
 
-                VStack(spacing: 0) { 
-
+                    // Top Bar (dark + light friendly)
                     ZStack {
                         Color("blue2").ignoresSafeArea(edges: .top)
+
                         Text("Board Rooms")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("blue"))
+                            .accessibilityAddTraits(.isHeader)
                     }
-                    .frame(height: topBarHeight)
+                    .frame(height: layout.topBarHeight)
 
                     if viewModel.isLoading {
                         Spacer()
@@ -33,16 +34,19 @@ struct HomeView: View {
                     } else {
 
                         ScrollView {
-                            VStack(spacing: 24) {
+                            VStack(spacing: layout.sectionSpacing) {
 
+                                // Banner
                                 Image("Available today")
                                     .resizable()
                                     .scaledToFill()
-                                    .frame(width: bannerWidth, height: bannerHeight)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: layout.bannerHeight)
                                     .clipped()
-                                    .cornerRadius(12)
+                                    .cornerRadius(layout.bannerCornerRadius)
 
-                                VStack(alignment: .leading, spacing: 12) {
+                                // My booking
+                                VStack(alignment: .leading, spacing: layout.blockSpacing) {
                                     sectionHeader(title: "My booking", actionTitle: "See All")
 
                                     if let lastBooking = viewModel.myBookings.last,
@@ -62,22 +66,25 @@ struct HomeView: View {
                                                 capacity: "\(room.fields.seatNo)",
                                                 statusText: formatBookingDate(lastBooking.fields.date),
                                                 statusColor: Color("blue2"),
-                                                statusTextColor: .white,
+                                                statusTextColor: Color.appOnBlue,
                                                 facilities: room.fields.facilities,
-                                                imageSize: cardImageSize
+                                                imageSize: layout.cardImageSize
+                                                    
                                             )
                                         }
-                                        .buttonStyle(.plain).simultaneousGesture(TapGesture().onEnded {
+                                        .buttonStyle(.plain)
+                                        .simultaneousGesture(TapGesture().onEnded {
                                             selectedRoomID = room.id
                                             applyCalendarAvailabilityForSelectedRoom()
                                         })
 
                                     } else {
-                                        emptyStateView(message: "No active bookings found")
+                                        emptyStateView(message: "No active bookings found", layout: layout)
                                     }
                                 }
 
-                                VStack(alignment: .leading, spacing: 12) {
+                               
+                                VStack(alignment: .leading, spacing: layout.blockSpacing) {
                                     Text("All bookings for March")
                                         .font(.title3)
                                         .bold()
@@ -85,36 +92,38 @@ struct HomeView: View {
 
                                     CalendarStripView(vm: calendarVM)
 
-                                    ForEach(viewModel.rooms) { room in
-                                        let myBooking = viewModel.myBookingForRoom(room.id)
+                                    LazyVStack(spacing: layout.cardSpacing) {
+                                        ForEach(viewModel.rooms) { room in
+                                            let myBooking = viewModel.myBookingForRoom(room.id)
 
-                                        NavigationLink {
-                                            RoomDetailView(
-                                                roomRecord: room,
-                                                existingBooking: myBooking,
-                                                roomBookings: viewModel.bookingsForRoom(room.id)
-                                            )
-                                        } label: {
-                                            bookingCard(
-                                                imageURL: room.fields.imageURL,
-                                                name: room.fields.name,
-                                                floor: "Floor \(room.fields.floorNo)",
-                                                capacity: "\(room.fields.seatNo)",
-                                                statusText: myBooking == nil ? "Available" : formatBookingDate(myBooking!.fields.date),
-                                                statusColor: Color("blue2"),
-                                                statusTextColor: .white,
-                                                facilities: room.fields.facilities,
-                                                imageSize: cardImageSize
-                                            )
+                                            NavigationLink {
+                                                RoomDetailView(
+                                                    roomRecord: room,
+                                                    existingBooking: myBooking,
+                                                    roomBookings: viewModel.bookingsForRoom(room.id)
+                                                )
+                                            } label: {
+                                                bookingCard(
+                                                    imageURL: room.fields.imageURL,
+                                                    name: room.fields.name,
+                                                    floor: "Floor \(room.fields.floorNo)",
+                                                    capacity: "\(room.fields.seatNo)",
+                                                    statusText: myBooking == nil ? "Available" : formatBookingDate(myBooking!.fields.date),
+                                                    statusColor: Color("blue"),
+                                                    statusTextColor: Color.appOnBlue,
+                                                    facilities: room.fields.facilities,
+                                                    imageSize: layout.cardImageSize
+                                                )
+                                            }
+                                            .buttonStyle(.plain)
                                         }
-                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 16)
+                            .padding(.horizontal, layout.sidePadding)
+                            .padding(.vertical, layout.verticalPadding)
                         }
-                        .background(Color(.systemGroupedBackground))
+                        .background(Color.appGroupedBackground)
                         .refreshable {
                             await viewModel.loadData()
                             applyGlobalCalendarAvailability()
@@ -124,13 +133,13 @@ struct HomeView: View {
             }
         }
         .task(id: refreshToken) {
-           
             await viewModel.loadData()
-
             applyGlobalCalendarAvailability()
         }
         .navigationBarBackButtonHidden(true)
     }
+
+    // MARK: UI Parts
 
     private func sectionHeader(title: String, actionTitle: String) -> some View {
         HStack {
@@ -138,22 +147,30 @@ struct HomeView: View {
                 .font(.title3)
                 .bold()
                 .foregroundColor(Color("blue2"))
+
             Spacer()
+
             Text(actionTitle)
                 .font(.subheadline)
                 .foregroundColor(Color("orange2"))
         }
     }
 
-    private func emptyStateView(message: String) -> some View {
+    private func emptyStateView(message: String, layout: Layout) -> some View {
         Text(message)
             .font(.caption)
-            .foregroundColor(.gray)
+            .foregroundColor(Color.appSecondaryText)
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.white.opacity(0.5))
-            .cornerRadius(12)
+            .padding(layout.emptyStatePadding)
+            .background(Color.appCardBackground)
+            .cornerRadius(layout.cardCornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: layout.cardCornerRadius)
+                    .stroke(Color.appBorder, lineWidth: 1)
+            )
     }
+
+    // MARK: Date helpers
 
     func formatBookingDate(_ timestamp: Int) -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
@@ -162,11 +179,14 @@ struct HomeView: View {
         output.dateFormat = "d MMMM"
         return output.string(from: date)
     }
+
     private func normalizeToStartOfDay(_ ts: Int) -> Int {
         let seconds: TimeInterval = ts > 2_000_000_000_000 ? TimeInterval(ts) / 1000.0 : TimeInterval(ts)
         let d = Date(timeIntervalSince1970: seconds)
         return Int(Calendar.current.startOfDay(for: d).timeIntervalSince1970)
     }
+
+    // MARK: Calendar availability
 
     private func applyCalendarAvailabilityForSelectedRoom() {
         guard let roomID = selectedRoomID else {
@@ -174,19 +194,17 @@ struct HomeView: View {
             return
         }
 
-        // ✅ room ki booked days set
         let bookedDays = Set(
             viewModel.bookingsForRoom(roomID).map { normalizeToStartOfDay($0.fields.date) }
         )
 
-        // ✅ calendar me jis dayTS par booking hai, wo unavailable
         calendarVM.setAvailability { date in
             let dayTS = Int(Calendar.current.startOfDay(for: date).timeIntervalSince1970)
             return !bookedDays.contains(dayTS)
         }
     }
+
     private func applyGlobalCalendarAvailability() {
-        // ✅ jis date par koi bhi booking exist ho, wo unavailable
         let globallyBookedDays = Set(
             viewModel.bookings.map { normalizeToStartOfDay($0.fields.date) }
         )
@@ -197,6 +215,7 @@ struct HomeView: View {
         }
     }
 
+    // MARK: Card
 
     func bookingCard(
         imageURL: String,
@@ -210,17 +229,19 @@ struct HomeView: View {
         imageSize: CGFloat
     ) -> some View {
 
-        HStack(spacing: 12) {
+        HStack(alignment: .top, spacing: 12) {
 
             ZStack {
-                Color.gray.opacity(0.12)
+                Color.appImagePlaceholder
 
                 AsyncImage(url: URL(string: imageURL)) { phase in
                     if let image = phase.image {
-                        image.resizable().scaledToFill()
+                        image
+                            .resizable()
+                            .scaledToFill()
                     } else {
                         Image(systemName: "photo")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.appSecondaryText)
                     }
                 }
             }
@@ -228,33 +249,36 @@ struct HomeView: View {
             .cornerRadius(12)
             .clipped()
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
 
-                HStack {
+                HStack(alignment: .top) {
                     Text(name)
                         .font(.headline)
-                        .foregroundColor(Color("blue2"))
+                        .foregroundColor(Color.appText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.9)
 
-                    Spacer()
+                    Spacer(minLength: 8)
 
                     Text(statusText)
                         .font(.caption)
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 10)
                         .frame(height: 24)
                         .background(statusColor)
                         .foregroundColor(statusTextColor)
                         .cornerRadius(6)
+                        .lineLimit(1)
                 }
 
                 Text(floor)
                     .font(.subheadline)
-                    .foregroundColor(Color("dark_grey"))
+                    .foregroundColor(Color.appSecondaryText)
 
                 Label(capacity, systemImage: "person.2")
                     .font(.caption)
-                    .foregroundColor(Color("orange2"))
+                    .foregroundColor(Color.appOrange)
                     .padding(6)
-                    .background(Color.gray.opacity(0.12))
+                    .background(Color.appTagBackground)
                     .cornerRadius(6)
 
                 if !facilities.isEmpty {
@@ -263,13 +287,25 @@ struct HomeView: View {
                             facilityIcon(facility)
                         }
                     }
+                    .padding(.top, 2)
+                    
                 }
             }
         }
-        .padding()
-        .background(Color.white)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color.appCardBackground)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.appBorder, lineWidth: 1)
+        )
+        .shadow(
+            color: Color.black.opacity(colorScheme == .dark ? 0.12 : 0.06),
+            radius: 5,
+            x: 0,
+            y: 2
+        )
     }
 
     @ViewBuilder
@@ -289,13 +325,101 @@ struct HomeView: View {
     }
 }
 
+
+
+private struct Layout {
+    let width: CGFloat
+
+    var topBarHeight: CGFloat { 52 }
+
+    var sidePadding: CGFloat {
+        width < 360 ? 12 : 16
+    }
+
+    var verticalPadding: CGFloat {
+        width < 360 ? 12 : 16
+    }
+
+    var sectionSpacing: CGFloat {
+        width < 360 ? 16 : 24
+    }
+
+    var blockSpacing: CGFloat {
+        width < 360 ? 10 : 12
+    }
+
+    var cardSpacing: CGFloat {
+        width < 360 ? 10 : 12
+    }
+
+    var bannerHeight: CGFloat {
+        let w = max(width - (sidePadding * 2), 1)
+        let h = w * 0.385
+        return min(max(h, 130), 220)
+    }
+
+    var bannerCornerRadius: CGFloat { 12 }
+
+    var cardImageSize: CGFloat {
+        width < 360 ? 68 : 80
+    }
+
+    var cardCornerRadius: CGFloat { 12 }
+
+    var emptyStatePadding: CGFloat {
+        width < 360 ? 12 : 14
+    }
+}
+
+// MARK: Theme colors (dark + light)
+
+extension Color {
+    static let appBlue = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+        ? UIColor(red: 0.32, green: 0.56, blue: 0.98, alpha: 1.0)
+        : UIColor(red: 0.10, green: 0.33, blue: 0.93, alpha: 1.0)
+    })
+
+    static let appOnBlue = Color.white
+
+    static let appOrange = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+        ? UIColor(red: 1.00, green: 0.70, blue: 0.35, alpha: 1.0)
+        : UIColor(red: 0.98, green: 0.45, blue: 0.10, alpha: 1.0)
+    })
+
+    static let appText = Color(uiColor: .label)
+    static let appSecondaryText = Color(uiColor: .secondaryLabel)
+
+    static let appGroupedBackground = Color(uiColor: .systemGroupedBackground)
+    static let appCardBackground = Color(uiColor: .secondarySystemBackground)
+
+    static let appBorder = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+        ? UIColor.white.withAlphaComponent(0.10)
+        : UIColor.black.withAlphaComponent(0.08)
+    })
+
+    static let appTagBackground = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+        ? UIColor.white.withAlphaComponent(0.07)
+        : UIColor.black.withAlphaComponent(0.06)
+    })
+
+    static let appImagePlaceholder = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+        ? UIColor.white.withAlphaComponent(0.06)
+        : UIColor.black.withAlphaComponent(0.05)
+    })
+}
+
 extension View {
     func iconBadgeBlue() -> some View {
         self
             .font(.caption)
-            .foregroundColor(Color("blue2"))
             .padding(6)
-            .background(Color.gray.opacity(0.12))
+            .foregroundColor(Color("blue2"))
+            .background(Color.appTagBackground)
             .cornerRadius(6)
     }
 }

@@ -1,13 +1,36 @@
-//
-//  SuccessView.swift
-//  BoardRoomTeam12
-//
-//  Created by Athoub Alabdulrahim on 04/07/1447 AH.
-//
 import SwiftUI
+
+enum BookingActionType {
+    case created
+    case updated
+    case deleted
+
+    var title: String {
+        switch self {
+        case .created: return "Booking Success!"
+        case .updated: return "Booking Updated!"
+        case .deleted: return "Booking Deleted!"
+        }
+    }
+
+    func message(roomName: String, dateText: String) -> String {
+        switch self {
+        case .created:
+            return "Your booking for \(roomName) on \(dateText) is confirmed."
+        case .updated:
+            return "Your booking for \(roomName) has been updated to \(dateText)."
+        case .deleted:
+            return "Your booking for \(roomName) on \(dateText) has been deleted."
+        }
+    }
+}
 
 struct SuccessView: View {
     @Environment(\.dismiss) private var dismiss
+
+    let type: BookingActionType
+    let roomName: String
+    let dateText: String
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,12 +49,12 @@ struct SuccessView: View {
             }
             .padding(.bottom, 20)
 
-            Text("Booking Success!")
+            Text(type.title)
                 .font(.largeTitle.bold())
                 .foregroundColor(Color(red: 33/255, green: 38/255, blue: 82/255))
                 .padding(.bottom, 15)
 
-            Text("Your booking for Ideation Room on Sunday, March 19, 2023 is confirmed.")
+            Text(type.message(roomName: roomName, dateText: dateText))
                 .font(.footnote.bold())
                 .foregroundColor(Color("blue2"))
                 .multilineTextAlignment(.center)
@@ -43,9 +66,7 @@ struct SuccessView: View {
 
             Spacer()
 
-            Button(action: {
-                dismiss()
-            }) {
+            Button(action: { dismiss() }) {
                 Text("Done")
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
@@ -61,10 +82,5 @@ struct SuccessView: View {
         .ignoresSafeArea(edges: .top)
         .background(Color(red: 0.953, green: 0.953, blue: 0.953))
         .ignoresSafeArea()
-      //  .background(Color(.systemGroupedBackground))
     }
-}
-
-#Preview {
-    SuccessView()
 }
