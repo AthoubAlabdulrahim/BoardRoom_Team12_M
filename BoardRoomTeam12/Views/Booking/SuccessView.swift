@@ -44,12 +44,7 @@ struct SuccessView: View {
             Spacer()
 
             Button(action: {
-                // Pop SuccessView
                 dismiss()
-                // Then pop RoomDetailView back to HomeView
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    dismiss()
-                }
             }) {
                 Text("Done")
                     .fontWeight(.semibold)

@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		C61CFE002F03C025000895F8 /* EmployeesModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		67F1BEBB2EFA82B2003753EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,10 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		67F1BEAD2EFA82B1003753EE /* BoardRoomTeam12.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoardRoomTeam12.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		67F1BEBA2EFA82B2003753EE /* BoardRoomTeam12Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		67F1BEC42EFA82B2003753EE /* BoardRoomTeam12UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeesModels.swift; sourceTree = "<group>"; };
+		F42C8E3D2F0B7E650093849A /* BoardRoomTeam12.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoardRoomTeam12.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F42C8E3E2F0B7E650093849A /* BoardRoomTeam12Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F42C8E3F2F0B7E650093849A /* BoardRoomTeam12UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardRoomTeam12UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -83,19 +78,10 @@
 				67F1BEAF2EFA82B1003753EE /* BoardRoomTeam12 */,
 				67F1BEBD2EFA82B2003753EE /* BoardRoomTeam12Tests */,
 				67F1BEC72EFA82B2003753EE /* BoardRoomTeam12UITests */,
-				67F1BEAE2EFA82B1003753EE /* Products */,
-				C61CFDFF2F03C025000895F8 /* EmployeesModels.swift */,
+				F42C8E3D2F0B7E650093849A /* BoardRoomTeam12.app */,
+				F42C8E3E2F0B7E650093849A /* BoardRoomTeam12Tests.xctest */,
+				F42C8E3F2F0B7E650093849A /* BoardRoomTeam12UITests.xctest */,
 			);
-			sourceTree = "<group>";
-		};
-		67F1BEAE2EFA82B1003753EE /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				67F1BEAD2EFA82B1003753EE /* BoardRoomTeam12.app */,
-				67F1BEBA2EFA82B2003753EE /* BoardRoomTeam12Tests.xctest */,
-				67F1BEC42EFA82B2003753EE /* BoardRoomTeam12UITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -120,7 +106,7 @@
 			packageProductDependencies = (
 			);
 			productName = BoardRoomTeam12;
-			productReference = 67F1BEAD2EFA82B1003753EE /* BoardRoomTeam12.app */;
+			productReference = F42C8E3D2F0B7E650093849A /* BoardRoomTeam12.app */;
 			productType = "com.apple.product-type.application";
 		};
 		67F1BEB92EFA82B2003753EE /* BoardRoomTeam12Tests */ = {
@@ -143,7 +129,7 @@
 			packageProductDependencies = (
 			);
 			productName = BoardRoomTeam12Tests;
-			productReference = 67F1BEBA2EFA82B2003753EE /* BoardRoomTeam12Tests.xctest */;
+			productReference = F42C8E3E2F0B7E650093849A /* BoardRoomTeam12Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		67F1BEC32EFA82B2003753EE /* BoardRoomTeam12UITests */ = {
@@ -166,7 +152,7 @@
 			packageProductDependencies = (
 			);
 			productName = BoardRoomTeam12UITests;
-			productReference = 67F1BEC42EFA82B2003753EE /* BoardRoomTeam12UITests.xctest */;
+			productReference = F42C8E3F2F0B7E650093849A /* BoardRoomTeam12UITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -202,7 +188,7 @@
 			mainGroup = 67F1BEA42EFA82B1003753EE;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 67F1BEAE2EFA82B1003753EE /* Products */;
+			productRefGroup = 67F1BEA42EFA82B1003753EE;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -242,7 +228,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C61CFE002F03C025000895F8 /* EmployeesModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,7 +389,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MUU9NR59TD;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -436,7 +421,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MUU9NR59TD;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

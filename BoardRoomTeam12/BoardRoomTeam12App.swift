@@ -9,12 +9,14 @@ import SwiftUI
 
 @main
 struct BoardRoomTeam12App: App {
+
+    @State private var isLoggedIn = UserSession.shared.isLoggedIn
+
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                LoginView()
+                RootView(isLoggedIn: $isLoggedIn)
             }
-            .navigationBarBackButtonHidden(true) // Hide the default back button for all pushed views
         }
     }
 }

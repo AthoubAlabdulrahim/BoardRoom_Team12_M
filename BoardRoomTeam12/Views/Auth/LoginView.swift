@@ -9,6 +9,7 @@ import SwiftUI
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     @State private var isPasswordVisible = false
+    @Environment(\.colorScheme) private var colorScheme
     
     private let fieldWidth: CGFloat = 340
     private let fieldHeight: CGFloat = 58
@@ -108,12 +109,12 @@ struct LoginView: View {
         }
         .background(Color(red: 0.953, green: 0.953, blue: 0.953))
         .ignoresSafeArea()
-        // Present HomeView when login succeeds
+        
         .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
             HomeView()
                 .interactiveDismissDisabled(true)
         }
-      //  .background(Color.white.ignoresSafeArea())
+     
     }
 }
 

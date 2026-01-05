@@ -1,32 +1,56 @@
 import SwiftUI
+import Combine
 
 struct RoomDetailView: View {
-    // 1. الخصائص التي نحتاجها من الخارج
-    let roomRecord: RoomRecord
-    let isExistingBooking: Bool
-    
+
+    let roomRecord: BoardRoom
+    let existingBooking: Booking?
+    let roomBookings: [Booking]
+
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = RoomDetailViewModel()
     @State private var navigateToSuccess = false
-    @State private var showDeleteConfirm = false
-    @State private var showUpdateConfirm = false
-    @State private var userSelectedDate = false
+
+    private var selectedTS: Int { viewModel.calendarVM.selectedUnixTimestamp }
+
+    // ✅ For new booking: just need a valid available date
+    private var canCreate: Bool {
+        viewModel.calendarVM.isAvailable(viewModel.calendarVM.selectedDate)
+    }
+
+    // ✅ For update: allow update only if date actually changed (you can remove this condition if you want)
+    private var canUpdate: Bool {
+        guard let existing = existingBooking else { return false }
+        return viewModel.calendarVM.isAvailable(viewModel.calendarVM.selectedDate) && selectedTS != normalize(existing.fields.date)
+    }
+
+    private func normalize(_ ts: Int) -> Int {
+        let seconds: TimeInterval
+        if ts > 2_000_000_000_000 { seconds = TimeInterval(ts) / 1000.0 } else { seconds = TimeInterval(ts) }
+        let d = Date(timeIntervalSince1970: seconds)
+        return Int(Calendar.current.startOfDay(for: d).timeIntervalSince1970)
+    }
 
     var body: some View {
+
         let deviceWidth = min(UIScreen.main.bounds.width, 430)
-        let horizontalPadding: CGFloat = 12 // shift content slightly left by using smaller padding
         let bannerHeight = deviceWidth * 0.72
         let gradientHeight: CGFloat = 84
+        let horizontalPadding: CGFloat = 12
 
         VStack(spacing: 0) {
-            CustomNavBar(title: roomRecord.fields.name)
-            
+
+            CustomNavBar(
+                title: roomRecord.fields.name,
+                onBack: { dismiss() }
+            )
+
             GeometryReader { geo in
                 let bottomInset = geo.safeAreaInsets.bottom
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
-                        // 🖼 صورة الغرفة
+
                         ZStack(alignment: .bottom) {
                             AsyncImage(url: URL(string: roomRecord.fields.imageURL)) { image in
                                 image.resizable().scaledToFill()
@@ -34,21 +58,22 @@ struct RoomDetailView: View {
                                 Color.gray.opacity(0.1)
                             }
                             .frame(height: bannerHeight)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .clipped()
-                            
+
                             LinearGradient(
                                 colors: [.clear, .white],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
                             .frame(height: gradientHeight)
-                            
+
                             HStack {
                                 Label("Floor \(roomRecord.fields.floorNo)", systemImage: "paperplane")
                                     .font(AppFont.caption)
                                     .foregroundColor(Color(red: 35/255, green: 36/255, blue: 85/255))
+
                                 Spacer()
+
                                 Label("\(roomRecord.fields.seatNo)", systemImage: "person.2")
                                     .font(AppFont.caption)
                                     .foregroundColor(.orange)
@@ -68,12 +93,10 @@ struct RoomDetailView: View {
                         Text(roomRecord.fields.description)
                             .font(AppFont.body)
                             .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.white)
                             .cornerRadius(10)
                             .padding(.horizontal, horizontalPadding)
-                        
-                        // المرافق
+
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Facilities")
                                 .font(AppFont.sectionTitle)
@@ -82,14 +105,16 @@ struct RoomDetailView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
                                     ForEach(roomRecord.fields.facilities, id: \.self) { facility in
-                                        FacilityChip(customIconName: getIconName(for: facility), title: facility)
+                                        FacilityChip(
+                                            customIconName: iconName(for: facility),
+                                            title: facility
+                                        )
                                     }
                                 }
                                 .padding(.horizontal, horizontalPadding)
                             }
                         }
 
-                        // التاريخ
                         Text("Select a date")
                             .font(AppFont.sectionTitle)
                             .padding(.horizontal, horizontalPadding)
@@ -97,31 +122,87 @@ struct RoomDetailView: View {
                         CalendarStripView(vm: viewModel.calendarVM)
                             .padding(.bottom, 4)
 
-                        // الأزرار أقرب للمحتوى
-                        if isExistingBooking {
-                            existingBookingButtons
-                        } else {
-                            newBookingButton
-                        }
+                        actionButtons
                     }
                     .padding(.top, 8)
-                    .padding(.bottom, max(8, bottomInset)) // safe-area aware, but minimal
-                    .frame(maxWidth: .infinity, alignment: .leading) // align left
+                    .padding(.bottom, max(8, bottomInset))
                 }
             }
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden(true)
-        .onAppear {
-            viewModel.setup(with: roomRecord)
+        .navigationDestination(isPresented: $navigateToSuccess) {
+            SuccessView()
+                .onDisappear { dismiss() }
         }
-        .onChange(of: viewModel.calendarVM.selectedDate) { _, _ in
-            userSelectedDate = true
+        .onAppear {
+            let booked = roomBookings.map { $0.fields.date }
+                let allow = existingBooking?.fields.date
+
+                // ✅ 1) Preselect existing booking date FIRST
+                if let b = existingBooking {
+                    viewModel.calendarVM.forceSelect(dateFromUnix(b.fields.date))
+                }
+
+                // ✅ 2) Then apply availability (so selected date is evaluated correctly)
+                viewModel.setup(bookedTimestamps: booked, allowTimestamp: allow)
         }
     }
-    
-    // دالة مساعدة لاختيار الأيقونة
-    func getIconName(for facility: String) -> String {
+
+    private var actionButtons: some View {
+        VStack(spacing: 10) {
+
+            if let booking = existingBooking {
+
+                Button("Update Booking") {
+                    Task {
+                        do {
+                            try await viewModel.updateBooking(booking: booking, roomID: roomRecord.id)
+                            navigateToSuccess = true
+                        } catch {
+                            print("❌ Update failed:", error.localizedDescription)
+                        }
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle(isEnabled: canUpdate))
+                .disabled(!canUpdate)
+                .opacity(canUpdate ? 1 : 0.6)
+
+                Button("Delete Booking") {
+                    Task {
+                        do {
+                            try await viewModel.deleteBooking(booking: booking)
+                            dismiss()
+                        } catch {
+                            print("❌ Delete failed:", error.localizedDescription)
+                        }
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle(isEnabled: true))
+
+            } else {
+
+                Button("Book Now") {
+                    Task {
+                        do {
+                            try await viewModel.createBooking(roomID: roomRecord.id)
+                            navigateToSuccess = true
+                        } catch {
+                            print("❌ Booking failed:", error.localizedDescription)
+                        }
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle(isEnabled: canCreate))
+                .disabled(!canCreate)
+                .opacity(canCreate ? 1 : 0.6)
+            }
+
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 4)
+    }
+
+    private func iconName(for facility: String) -> String {
         switch facility {
         case "Wi-Fi": return "wifi"
         case "Screen": return "tv"
@@ -130,43 +211,19 @@ struct RoomDetailView: View {
         default: return "star"
         }
     }
-
-    // الأزرار كـ Views منفصلة لترتيب الكود
-    var existingBookingButtons: some View {
-        VStack(spacing: 10) {
-            Button("Update") { showUpdateConfirm = true }
-                .buttonStyle(PrimaryButtonStyle(isEnabled: userSelectedDate))
-            
-            Button("Delete booking") { showDeleteConfirm = true }
-                .foregroundColor(Color("blue2"))
-                .padding(12)
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 2)
-        .padding(.bottom, 4)
-    }
-
-    var newBookingButton: some View {
-        Button("Booking") { navigateToSuccess = true }
-            .buttonStyle(PrimaryButtonStyle(isEnabled: userSelectedDate))
-            .padding(.horizontal, 12)
-            .padding(.top, 2)
-            .padding(.bottom, 4)
-            .opacity(userSelectedDate ? 1 : 0)
+    private func dateFromUnix(_ ts: Int) -> Date {
+        let seconds: TimeInterval = ts > 2_000_000_000_000 ? TimeInterval(ts) / 1000.0 : TimeInterval(ts)
+        return Date(timeIntervalSince1970: seconds)
     }
 }
 
-// Helper لستايل الأزرار
 struct PrimaryButtonStyle: ButtonStyle {
     let isEnabled: Bool
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(AppFont.button)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 13) // slightly tighter to keep button nearer
+            .padding(.vertical, 13)
             .background(Color(red: 212/255, green: 94/255, blue: 57/255))
             .foregroundColor(.white)
             .cornerRadius(12)

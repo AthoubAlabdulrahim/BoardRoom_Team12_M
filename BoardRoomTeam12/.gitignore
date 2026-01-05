@@ -33,3 +33,4 @@ fastlane/test_output
 
 # Secrets (do not commit)
 Secrets.swift
+Core/Config/Secrets.swift
