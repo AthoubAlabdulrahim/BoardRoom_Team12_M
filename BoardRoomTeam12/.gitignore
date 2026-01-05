@@ -34,3 +34,4 @@ fastlane/test_output
 # Secrets (do not commit)
 Secrets.swift
 BoardRoomTeam12/core/config/Secrets.swift
+
