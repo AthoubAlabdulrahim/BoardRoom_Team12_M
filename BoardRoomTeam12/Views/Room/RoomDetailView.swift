@@ -6,10 +6,14 @@ struct RoomDetailView: View {
     let roomRecord: BoardRoom
     let existingBooking: Booking?
     let roomBookings: [Booking]
+    
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = RoomDetailViewModel()
     @State private var navigateToSuccess = false
+    @State private var successType: BookingActionType = .created
+    @State private var successDateText: String = ""
+
 
     private var selectedTS: Int { viewModel.calendarVM.selectedUnixTimestamp }
 
@@ -132,8 +136,12 @@ struct RoomDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $navigateToSuccess) {
-            SuccessView()
-                .onDisappear { dismiss() }
+            SuccessView(
+                  type: successType,
+                  roomName: roomRecord.fields.name,
+                  dateText: successDateText
+              )
+              .onDisappear { dismiss() }
         }
         .onAppear {
             let booked = roomBookings.map { $0.fields.date }
@@ -157,11 +165,13 @@ struct RoomDetailView: View {
                 Button("Update Booking") {
                     Task {
                         do {
-                            try await viewModel.updateBooking(booking: booking, roomID: roomRecord.id)
-                            navigateToSuccess = true
-                        } catch {
-                            print("❌ Update failed:", error.localizedDescription)
-                        }
+                                   try await viewModel.updateBooking(booking: booking, roomID: roomRecord.id)
+                                   successType = .updated
+                                   successDateText = formatBookingDate(selectedTS)
+                                   navigateToSuccess = true
+                               } catch {
+                                   print("❌ Update failed:", error.localizedDescription)
+                               }
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle(isEnabled: canUpdate))
@@ -171,11 +181,13 @@ struct RoomDetailView: View {
                 Button("Delete Booking") {
                     Task {
                         do {
-                            try await viewModel.deleteBooking(booking: booking)
-                            dismiss()
-                        } catch {
-                            print("❌ Delete failed:", error.localizedDescription)
-                        }
+                                   try await viewModel.deleteBooking(booking: booking)
+                                   successType = .deleted
+                                   successDateText = formatBookingDate(booking.fields.date)
+                                   navigateToSuccess = true
+                               } catch {
+                                   print("❌ Delete failed:", error.localizedDescription)
+                               }
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle(isEnabled: true))
@@ -185,11 +197,13 @@ struct RoomDetailView: View {
                 Button("Book Now") {
                     Task {
                         do {
-                            try await viewModel.createBooking(roomID: roomRecord.id)
-                            navigateToSuccess = true
-                        } catch {
-                            print("❌ Booking failed:", error.localizedDescription)
-                        }
+                                   try await viewModel.createBooking(roomID: roomRecord.id)
+                                   successType = .created
+                                   successDateText = formatBookingDate(selectedTS)
+                                   navigateToSuccess = true
+                               } catch {
+                                   print("❌ Booking failed:", error.localizedDescription)
+                               }
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle(isEnabled: canCreate))
@@ -200,6 +214,15 @@ struct RoomDetailView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)
+    }
+
+    private func formatBookingDate(_ timestamp: Int) -> String {
+        let seconds: TimeInterval = timestamp > 2_000_000_000_000 ? TimeInterval(timestamp) / 1000.0 : TimeInterval(timestamp)
+        let date = Date(timeIntervalSince1970: seconds)
+        let output = DateFormatter()
+        output.locale = Locale(identifier: "en_US_POSIX")
+        output.dateFormat = "EEEE, d MMMM yyyy"
+        return output.string(from: date)
     }
 
     private func iconName(for facility: String) -> String {

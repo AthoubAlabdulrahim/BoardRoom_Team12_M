@@ -16,10 +16,10 @@ final class BookingViewModel: ObservableObject {
         defer { isLoading = false }
 
         do { rooms = try await roomService.fetchRooms() }
-        catch { print("❌ ROOM ERROR:", error) }
+        catch { print("Rooms Error:", error) }
 
         do { bookings = try await bookingService.fetchBookings() }
-        catch { print("❌ BOOKING ERROR:", error) }
+        catch { print("Booking Error:", error) }
     }
 
     private func normalizeToStartOfDay(_ ts: Int) -> Int {
@@ -49,14 +49,14 @@ final class BookingViewModel: ObservableObject {
             .sorted { normalizeToStartOfDay($0.fields.date) < normalizeToStartOfDay($1.fields.date) }
     }
 
-    // ✅ Nearest upcoming booking for this room (edit always correct one)
+   
     func myBookingForRoom(_ roomID: String) -> Booking? {
         myBookings
             .filter { $0.fields.boardroomID == roomID }
             .min { normalizeToStartOfDay($0.fields.date) < normalizeToStartOfDay($1.fields.date) }
     }
 
-    // ✅ Next upcoming booking overall
+    
     var nextMyBooking: Booking? {
         myBookings.first
     }

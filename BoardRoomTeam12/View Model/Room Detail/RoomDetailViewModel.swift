@@ -13,7 +13,7 @@ final class RoomDetailViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        // ✅ Forward CalendarStrip changes so RoomDetailView updates canUpdate properly
+       
         calendarVM.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
