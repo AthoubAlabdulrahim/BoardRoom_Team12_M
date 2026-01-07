@@ -79,5 +79,4 @@ Sensitive data such as:
 - Base URLs
 - Authorization headers
 are stored in Secrets.swift, which is excluded from version control via .gitignore.
-
-![Board Rooms](assets/images/BoardRooms.png)
+![Board Rooms](./BoardRooms.png)
