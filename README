@@ -81,3 +81,4 @@ Sensitive data such as:
 - Authorization headers
 are stored in Secrets.swift, which is excluded from version control via .gitignore.
 
+![Board Rooms](BoardRooms.png)
