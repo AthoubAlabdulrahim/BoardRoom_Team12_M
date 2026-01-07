@@ -33,7 +33,6 @@ BoardRoomTeam12
 │   ├── Login
 │   └── Room Detail
 ├── Views
-│   ├── Auth
 │   ├── Booking
 │   ├── Components
 │   ├── Home
@@ -81,4 +80,4 @@ Sensitive data such as:
 - Authorization headers
 are stored in Secrets.swift, which is excluded from version control via .gitignore.
 
-![Board Rooms](BoardRooms.png)
+![Board Rooms](assets/images/BoardRooms.png)
