@@ -7,39 +7,6 @@ The project follows MVVM (Model–View–ViewModel):
 View  →  ViewModel  →  Service  →  APIClient  →  Backend
 To ensure clear separation between UI and business logic. and provide easier testing and maintenance.
 
-📂 Project Structure
-BoardRoomTeam12
-├── core
-│   ├── config
-│   │   └── Secrets.swift          # API keys & configuration (gitignored)
-│   ├── Network
-│   │   ├── APIClient.swift        # Centralized networking layer
-│   │   ├── APIError.swift         # Unified error handling
-│   │   └── Endpoints.swift        # All API endpoints
-│   └── Storage
-│       └── UserSession.swift      # User login/session state
-├── Models
-│   ├── AirtableResponse.swift     # Generic API response wrapper
-│   ├── BoardRoom.swift
-│   ├── Booking.swift
-│   └── Employee.swift
-├── Services
-│   ├── BoardRoomService.swift     # Business logic for rooms
-│   ├── BookingService.swift       # Business logic for bookings
-│   └── EmployeeService.swift      # Business logic for employees
-├── View Model
-│   ├── Booking
-│   ├── Calendar
-│   ├── Login
-│   └── Room Detail
-├── Views
-│   ├── Booking
-│   ├── Components
-│   ├── Home
-│   ├── Room
-│   └── Root
-└── Assets
-
 🌐 Networking Layer
 The networking layer is centralized and reusable, designed to work with any API endpoint.
 1) APIClient
