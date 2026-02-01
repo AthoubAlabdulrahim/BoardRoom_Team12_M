@@ -1,5 +1,5 @@
 iOS Boardroom Booking App 
-BoardRoom is an iOS application that allows employees to view available boardrooms, book rooms, and manage reservations in a simple and intuitive interface.
+An iOS application that allows employees to view available boardrooms, book rooms, and manage reservations in a simple and intuitive interface.
 The app is built using SwiftUI ensuring scalability and maintainability.
 
 🏗 Architecture
